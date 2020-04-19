@@ -3,8 +3,10 @@
  * @see https://gist.github.com/DorianRudolph/ca283dfdfd185bc812b7
  *
  */
-
-#define DATA_PIN  3 // Define DATA_PIN (PS/2 Data)
+/**
+ ************* THIS VERSION IS NOT WORKING *************
+*/
+#define DATA_PIN  1 // Define DATA_PIN (PS/2 Data)
 #define CLOCK_PIN 2  // Define CLOCK_PIN (PS/2 Clock). This PIN must supporting interrupts.
 
 #ifdef ARDUINO_AVR_DIGISPARK
@@ -323,5 +325,9 @@ void loop() {
         ext = false;
       }
     }
+  } else {
+#ifdef ARDUINO_AVR_DIGISPARK
+    DigiKeyboard.sendKeyStroke(0);
   }
+#endif
 }
