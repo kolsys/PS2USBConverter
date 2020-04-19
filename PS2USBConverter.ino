@@ -4,11 +4,33 @@
  *
  */
 
-#include <Keyboard.h>
-
-#define DATA_PIN  10 // Define DATA_PIN (PS/2 Data)
+#define DATA_PIN  3 // Define DATA_PIN (PS/2 Data)
 #define CLOCK_PIN 2  // Define CLOCK_PIN (PS/2 Clock). This PIN must supporting interrupts.
 
+#ifdef ARDUINO_AVR_DIGISPARK
+  //  Low level key report: up to 6 keys and shift, ctrl etc at once
+  typedef struct
+  {
+    uint8_t modifiers;
+    uint8_t reserved;
+    uint8_t keys[6];
+  } KeyReport;
+
+  #define KEYBOARD_H <DigiKeyboard.h>
+  #define keyboardInit()
+  #define INTERUPT CLOCK_PIN
+  #define sendReport() \
+    for (byte i = 0; i < sizeof(((KeyReport *)0)->keys); i++) DigiKeyboard.sendKeyStroke(report.keys[i], report.modifiers)
+
+#else
+  #define KEYBOARD_H <Keyboard.h>
+  #define keyboardInit() (Keyboard.begin())
+  #define INTERUPT digitalPinToInterrupt(CLOCK_PIN)
+  #define sendReport() \
+    HID().SendReport(2, &report, sizeof(KeyReport))
+#endif
+
+#include KEYBOARD_H
 #define BUFFER_SIZE 45
 
 static volatile uint8_t buffer[BUFFER_SIZE];
@@ -187,7 +209,7 @@ static inline uint8_t getScancode(void) {
 }
 
 void setupPS2() {
-  attachInterrupt(digitalPinToInterrupt(CLOCK_PIN), PS2Interrupt, FALLING);
+  attachInterrupt(INTERUPT, PS2Interrupt, FALLING);
   pinMode(CLOCK_PIN, INPUT_PULLUP);
   pinMode(DATA_PIN, INPUT_PULLUP);
   head = 0;
@@ -199,7 +221,7 @@ void setup() {
   setupKeymaps();
   setupPS2();
 
-  Keyboard.begin();
+  keyboardInit();
   delay(1000);
 }
 
@@ -234,11 +256,6 @@ void removeFromReport(uint8_t k) {
       }
     }
   }
-}
-
-// Copypaste from Keyboard lib
-void sendReport() {
-  HID().SendReport(2, &report, sizeof(KeyReport));
 }
 
 void sendMessage(uint8_t m) {
