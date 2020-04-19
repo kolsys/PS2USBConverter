@@ -6,8 +6,8 @@
 
 #include <Keyboard.h>
 
-#define DATA_PIN  10 // Define DATA_PIN (PS/2 Data)
-#define CLOCK_PIN 2  // Define CLOCK_PIN (PS/2 Clock). This PIN must supporting interrupts.
+#define DATA_PIN  4 // Define DATA_PIN (PS/2 Data)
+#define CLOCK_PIN 3  // Define CLOCK_PIN (PS/2 Clock). This PIN must supporting interrupts.
 
 #define BUFFER_SIZE 45
 
